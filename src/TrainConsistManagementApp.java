@@ -1,92 +1,100 @@
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
 /**
- * MAIN CLASS - UseCase13TrainConsistMgmt
- * -------------------------------------------------------
- * Use Case 13: Performance Comparison (Loops vs Streams)
- * Description: Compares execution time of loop-based vs stream-based filtering.
+ * Custom Exception for invalid bogie data
  */
-public class TrainConsistManagementApp{
+class InvalidCapacityException extends Exception {
+    public InvalidCapacityException(String message) {
+        super(message);
+    }
+}
 
-    // Bogie model for performance testing
+/**
+ * MAIN CLASS - UseCase14TrainConsistMgmt
+ * -------------------------------------------------------
+ * Use Case 14: Exception Handling in Train Management
+ * Description: Handles NullPointerException and custom capacity validation.
+ */
+public class TrainConsistManagementApp {
+
     public static class Bogie {
-        private String type;
+        private String name;
         private int capacity;
 
-        public Bogie(String type, int capacity) {
-            this.type = type;
+        public Bogie(String name, int capacity) {
+            this.name = name;
             this.capacity = capacity;
         }
 
-        public String getType() { return type; }
         public int getCapacity() { return capacity; }
+    }
+
+    /**
+     * Validates a list of bogies for nullity and capacity rules.
+     */
+    public static void validateBogies(List<Bogie> bogies) throws InvalidCapacityException {
+        // 1. Handle NullPointerException (Step 2)
+        if (bogies == null) {
+            throw new NullPointerException("Bogie list is null!");
+        }
+
+        // 2. Handle Custom Exception for negative capacity (Step 3)
+        for (Bogie b : bogies) {
+            if (b.getCapacity() < 0) {
+                throw new InvalidCapacityException("Capacity cannot be negative: " + b.getCapacity());
+            }
+        }
     }
 
     public static void main(String[] args) {
         System.out.println("================================================");
-        System.out.println(" UC13 - Performance Comparison (Loops vs Streams) ");
+        System.out.println(" UC14 - Exception Handling (Null & Custom) ");
         System.out.println("================================================\n");
 
-        // 1. Create large test dataset (e.g., 100,000 bogies)
-        List<Bogie> bogies = new ArrayList<>();
-        for (int i = 0; i < 100000; i++) {
-            bogies.add(new Bogie("Type" + (i % 5), (i % 100)));
+        // Example Scenario: Valid list
+        List<Bogie> train = new ArrayList<>();
+        train.add(new Bogie("Sleeper", 72));
+
+        try {
+            validateBogies(train);
+            System.out.println("Validation Status: PASSED");
+        } catch (NullPointerException | InvalidCapacityException e) {
+            System.out.println("Validation Status: FAILED - " + e.getMessage());
         }
 
-        // 2. Measure Loop execution time
-        long startLoop = System.nanoTime();
-        List<Bogie> loopResult = new ArrayList<>();
-        for (Bogie b : bogies) {
-            if (b.getCapacity() > 60) {
-                loopResult.add(b);
-            }
-        }
-        long endLoop = System.nanoTime();
-        long loopDuration = endLoop - startLoop;
+        System.out.println("\nUC14 validation completed...");
 
-        // 3. Measure Stream execution time
-        long startStream = System.nanoTime();
-        List<Bogie> streamResult = bogies.stream()
-                .filter(b -> b.getCapacity() > 60)
-                .collect(Collectors.toList());
-        long endStream = System.nanoTime();
-        long streamDuration = endStream - startStream;
-
-        // 4, 5. Display performance results
-        System.out.println("Loop Execution Time (ns): " + loopDuration);
-        System.out.println("Stream Execution Time (ns): " + streamDuration);
-        System.out.println("\nUC13 performance benchmarking completed...");
-
-        // Run internal validation tests
-        runInternalTests(loopResult, streamResult, loopDuration, streamDuration);
+        // Run internal validation tests matching your test case snapshots
+        runInternalTests();
     }
 
-    /**
-     * Internal test suite to validate requirements from the test case snapshots.
-     */
-    public static void runInternalTests(List<Bogie> loopRes, List<Bogie> streamRes, long loopTime, long streamTime) {
-        System.out.println("\n--- Running Performance Validation Tests ---");
+    public static void runInternalTests() {
+        System.out.println("\n--- Running Exception Validation Tests ---");
 
-        // testLoopFilteringLogic() & testStreamFilteringLogic()
-        // Verifies capacity > 60 rule for both
-        boolean filterCheck = loopRes.stream().allMatch(b -> b.getCapacity() > 60) &&
-                streamRes.stream().allMatch(b -> b.getCapacity() > 60);
-        System.out.println("Test: Filtering Logic Validity: " + (filterCheck ? "PASS" : "FAIL"));
+        // testException_NullBogieList
+        try {
+            validateBogies(null);
+            System.out.println("Test Null List: FAIL");
+        } catch (NullPointerException e) {
+            System.out.println("Test Null List: PASS (Caught NPE)");
+        } catch (Exception e) { System.out.println("Test Null List: FAIL"); }
 
-        // testLoopAndStreamResultsMatch()
-        // Verifies that both methods produce identical result counts
-        boolean matchCheck = (loopRes.size() == streamRes.size());
-        System.out.println("Test: Result Consistency: " + (matchCheck ? "PASS" : "FAIL"));
+        // testException_InvalidCapacity
+        try {
+            List<Bogie> badTrain = List.of(new Bogie("Faulty", -10));
+            validateBogies(badTrain);
+            System.out.println("Test Negative Capacity: FAIL");
+        } catch (InvalidCapacityException e) {
+            System.out.println("Test Negative Capacity: PASS (Caught InvalidCapacityException)");
+        } catch (Exception e) { System.out.println("Test Negative Capacity: FAIL"); }
 
-        // testExecutionTimeMeasurement()
-        // Verifies timestamps are recorded and duration is positive
-        boolean timeCheck = loopTime > 0 && streamTime > 0;
-        System.out.println("Test: Time Measurement Validity: " + (timeCheck ? "PASS" : "FAIL"));
-
-        // testLargeDatasetProcessing()
-        // Verifies the system handled the 100k records
-        System.out.println("Test: Large Dataset Handled: PASS");
+        // testException_ValidBogieData
+        try {
+            validateBogies(List.of(new Bogie("Good", 50)));
+            System.out.println("Test Valid Data: PASS");
+        } catch (Exception e) {
+            System.out.println("Test Valid Data: FAIL");
+        }
     }
 }
