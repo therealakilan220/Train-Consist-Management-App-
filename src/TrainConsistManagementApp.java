@@ -1,86 +1,93 @@
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Scanner;
+import java.util.regex.Pattern;
 
 /**
- * MAIN CLASS - UseCase10TrainConsistMgmt
+ * MAIN CLASS - UseCase11TrainConsistMgmt
  * -------------------------------------------------------
- * Use Case 10: Count Total Seats in Train
- * Description: Aggregates seating capacity of all bogies into a single total using Stream reduce().
+ * Use Case 11: Validate Train ID and Cargo Code
+ * Description: Validates input formats using Regular Expressions (Pattern matching).
  */
 public class TrainConsistManagementApp {
 
-    // Reusing Bogie model
-    public static class Bogie {
-        private String name;
-        private int capacity;
+    // Regex Rules
+    // ^TRN-\\d{4}$ -> Starts with TRN-, followed by exactly 4 digits
+    private static final String TRAIN_ID_REGEX = "^TRN-\\d{4}$";
+    // ^PET-[A-Z]{2}$ -> Starts with PET-, followed by exactly 2 uppercase letters
+    private static final String CARGO_CODE_REGEX = "^PET-[A-Z]{2}$";
 
-        public Bogie(String name, int capacity) {
-            this.name = name;
-            this.capacity = capacity;
-        }
-
-        public String getName() { return name; }
-        public int getCapacity() { return capacity; }
-
-        @Override
-        public String toString() {
-            return name + " -> " + capacity;
-        }
+    /**
+     * Core validation logic using String matches() method
+     */
+    public static boolean isValid(String input, String regex) {
+        if (input == null || input.isEmpty()) return false;
+        return input.matches(regex);
     }
 
     public static void main(String[] args) {
         System.out.println("================================================");
-        System.out.println(" UC10 - Count Total Seats in Train ");
+        System.out.println(" UC11 - Validate Train ID and Cargo Code ");
         System.out.println("================================================\n");
 
-        // 1. Create list of bogies
-        List<Bogie> bogies = new ArrayList<>();
-        bogies.add(new Bogie("Sleeper", 72));
-        bogies.add(new Bogie("AC Chair", 56));
-        bogies.add(new Bogie("First Class", 24));
-        bogies.add(new Bogie("Sleeper", 70));
+        Scanner scanner = new Scanner(System.in);
 
-        // Display input bogies
-        System.out.println("Bogies in Train:");
-        for (Bogie b : bogies) {
-            System.out.println(b);
+        // 1. User enters Train ID
+        System.out.print("Enter Train ID (Format: TRN-1234): ");
+        String trainId = scanner.nextLine();
+
+        // 1. User enters Cargo Code
+        System.out.print("Enter Cargo Code (Format: PET-AB): ");
+        String cargoCode = scanner.nextLine();
+
+        // 2, 3, 4, 5. Compile, Match, and Validate
+        boolean isTrainValid = isValid(trainId, TRAIN_ID_REGEX);
+        boolean isCargoValid = isValid(cargoCode, CARGO_CODE_REGEX);
+
+        System.out.println("\nValidation Results:");
+        System.out.println("Train ID Valid: " + isTrainValid);
+        System.out.println("Cargo Code Valid: " + isCargoValid);
+
+        if (isTrainValid && isCargoValid) {
+            System.out.println("\nAll formats are correct. Program continues.");
+        } else {
+            System.out.println("\nError: One or more inputs follow an invalid format.");
         }
 
-        // 2, 3. AGGREGATE USING REDUCE
-        // map() extracts capacity, reduce() sums them starting from identity 0
-        int totalCapacity = bogies.stream()
-                .map(Bogie::getCapacity)
-                .reduce(0, (sum, cap) -> sum + cap);
+        System.out.println("\nUC11 validation completed...");
 
-        // 4. Display total seat count
-        System.out.println("\nTotal Seating Capacity of Train: " + totalCapacity);
+        // Run internal tests matching the Test Case Examples provided
+        runInternalTests();
 
-        System.out.println("\nUC10 aggregation completed...");
-
-        // Run internal validation tests matching the Test Case Examples
-        runInternalTests(bogies, totalCapacity);
+        scanner.close();
     }
 
     /**
      * Internal test suite to validate requirements from the test case snapshots.
      */
-    public static void runInternalTests(List<Bogie> originalList, int actualTotal) {
-        System.out.println("\n--- Running Validation Tests ---");
+    public static void runInternalTests() {
+        System.out.println("\n--- Running Regex Validation Tests ---");
 
-        // testReduce_TotalSeatCalculation
-        int expected = 72 + 56 + 24 + 70; // 222
-        System.out.println("Test: Total Sum Calculation: " + (actualTotal == expected ? "PASSED" : "FAILED"));
+        // testRegex_ValidTrainID
+        System.out.println("Test Valid Train ID (TRN-1234): " + (isValid("TRN-1234", TRAIN_ID_REGEX) ? "PASS" : "FAIL"));
 
-        // testReduce_SingleBogieHandling
-        List<Bogie> singleList = List.of(new Bogie("Solo", 50));
-        int singleTotal = singleList.stream().map(Bogie::getCapacity).reduce(0, Integer::sum);
-        System.out.println("Test: Single Bogie Handling: " + (singleTotal == 50 ? "PASSED" : "FAILED"));
+        // testRegex_InvalidTrainIDFormat
+        System.out.println("Test Invalid Train ID (TRAIN12): " + (!isValid("TRAIN12", TRAIN_ID_REGEX) ? "PASS" : "FAIL"));
 
-        // testReduce_EmptyBogieList
-        int emptyTotal = new ArrayList<Bogie>().stream().map(Bogie::getCapacity).reduce(0, Integer::sum);
-        System.out.println("Test: Empty List Identity (0): " + (emptyTotal == 0 ? "PASSED" : "FAILED"));
+        // testRegex_TrainIDDigitLengthValidation
+        System.out.println("Test Train ID Length (TRN-123): " + (!isValid("TRN-123", TRAIN_ID_REGEX) ? "PASS" : "FAIL"));
 
-        // testReduce_OriginalListUnchanged
-        System.out.println("Test: Original Collection Integrity: " + (originalList.size() == 4 ? "PASSED" : "FAILED"));
+        // testRegex_ValidCargoCode
+        System.out.println("Test Valid Cargo (PET-AB): " + (isValid("PET-AB", CARGO_CODE_REGEX) ? "PASS" : "FAIL"));
+
+        // testRegex_InvalidCargoCodeFormat
+        System.out.println("Test Invalid Cargo (PET-123): " + (!isValid("PET-123", CARGO_CODE_REGEX) ? "PASS" : "FAIL"));
+
+        // testRegex_CargoCodeUppercaseValidation
+        System.out.println("Test Cargo Case (PET-ab): " + (!isValid("PET-ab", CARGO_CODE_REGEX) ? "PASS" : "FAIL"));
+
+        // testRegex_EmptyInputHandling
+        System.out.println("Test Empty Input: " + (!isValid("", TRAIN_ID_REGEX) ? "PASS" : "FAIL"));
+
+        // testRegex_ExactPatternMatch (rejecting extra characters)
+        System.out.println("Test Exact Match (TRN-12345): " + (!isValid("TRN-12345", TRAIN_ID_REGEX) ? "PASS" : "FAIL"));
     }
 }
