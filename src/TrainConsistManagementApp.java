@@ -1,59 +1,58 @@
-import java.util.LinkedList;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.List;
 
-/**
- * ==========================================================
- * MAIN CLASS - UseCase4TrainConsistMgmt
- * ==========================================================
- * * Use Case 4: Maintain Ordered Bogie Consist
- * * Description:
- * This class models the physical chaining of train bogies
- * using LinkedList for ordered operations.
- * * At this stage, the application:
- * - Adds bogies in sequence
- * - Inserts bogies at specific positions
- * - Removes bogies from front and rear
- * - Displays updated train structure
- * * This maps positional operations using LinkedList.
- * * @author Developer
- * @version 4.0
- */
 public class TrainConsistManagementApp {
 
+    // Inner Bogie class to model passenger bogies
+    static class Bogie {
+        String name;
+        int capacity;
+
+        Bogie(String name, int capacity) {
+            this.name = name;
+            this.capacity = capacity;
+        }
+
+        @Override
+        public String toString() {
+            return name + " -> " + capacity;
+        }
+    }
+
     public static void main(String[] args) {
+        System.out.println("================================================");
+        System.out.println(" UC7 - Sort Bogies by Capacity (Comparator) ");
+        System.out.println("================================================\n");
 
-        System.out.println("==========================================");
-        System.out.println(" UC4 - Maintain Ordered Bogie Consist ");
-        System.out.println("==========================================\n");
+        // Create list of passenger bogies
+        List<Bogie> bogies = new ArrayList<>();
+        bogies.add(new Bogie("Sleeper", 72));
+        bogies.add(new Bogie("AC Chair", 56));
+        bogies.add(new Bogie("First Class", 24));
+        bogies.add(new Bogie("General", 90));
 
-        // Create a LinkedList
-        // LinkedList maintains insertion order and allows fast inserts
-        LinkedList<String> trainConsist = new LinkedList<>();
+        // Display data before sorting
+        System.out.println("Before Sorting:");
+        for (Bogie b : bogies) {
+            System.out.println(b);
+        }
 
-        // Add initial bogies
-        trainConsist.add("Engine");
-        trainConsist.add("Sleeper");
-        trainConsist.add("AC");
-        trainConsist.add("Cargo");
-        trainConsist.add("Guard");
+        // Sort using Comparator logic (Ascending order by capacity)
+        Collections.sort(bogies, new Comparator<Bogie>() {
+            @Override
+            public int compare(Bogie b1, Bogie b2) {
+                return Integer.compare(b1.capacity, b2.capacity);
+            }
+        });
 
-        System.out.println("Initial Train Consist:");
-        System.out.println(trainConsist + "\n");
+        // Display sorted result
+        System.out.println("\nAfter Sorting by Capacity:");
+        for (Bogie b : bogies) {
+            System.out.println(b);
+        }
 
-        // ---- INSERTION ----
-        // Insert a Pantry Car at position 2 (0-based index: Engine=0, Sleeper=1, Pantry=2)
-        trainConsist.add(2, "Pantry Car");
-
-        System.out.println("After Inserting 'Pantry Car' at position 2:");
-        System.out.println(trainConsist + "\n");
-
-        // ---- DELETION FROM ENDS ----
-        // removeFirst() and removeLast() are unique to LinkedList
-        trainConsist.removeFirst(); // Removes Engine
-        trainConsist.removeLast();  // Removes Guard
-
-        System.out.println("After Removing First and Last Bogie:");
-        System.out.println(trainConsist);
-
-        System.out.println("\nUC4 ordered consist operations completed...");
+        System.out.println("\nUC7 sorting completed...");
     }
 }
