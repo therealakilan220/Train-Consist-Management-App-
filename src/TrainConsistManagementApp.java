@@ -1,100 +1,58 @@
-import java.util.ArrayList;
-import java.util.List;
-
-/**
- * Custom Exception for invalid bogie data
- */
-class InvalidCapacityException extends Exception {
-    public InvalidCapacityException(String message) {
-        super(message);
-    }
-}
-
-/**
- * MAIN CLASS - UseCase14TrainConsistMgmt
- * -------------------------------------------------------
- * Use Case 14: Exception Handling in Train Management
- * Description: Handles NullPointerException and custom capacity validation.
- */
 public class TrainConsistManagementApp {
 
-    public static class Bogie {
-        private String name;
-        private int capacity;
-
-        public Bogie(String name, int capacity) {
-            this.name = name;
-            this.capacity = capacity;
+    // ----- CUSTOM RUNTIME EXCEPTION -----
+    static class CargoSafetyException extends RuntimeException {
+        public CargoSafetyException(String message) {
+            super(message);
         }
-
-        public int getCapacity() { return capacity; }
     }
 
-    /**
-     * Validates a list of bogies for nullity and capacity rules.
-     */
-    public static void validateBogies(List<Bogie> bogies) throws InvalidCapacityException {
-        // 1. Handle NullPointerException (Step 2)
-        if (bogies == null) {
-            throw new NullPointerException("Bogie list is null!");
+    // ----- GOODS BOGIE MODEL -----
+    static class GoodsBogie {
+        String shape;
+        String cargo;
+
+        GoodsBogie(String shape) {
+            this.shape = shape;
         }
 
-        // 2. Handle Custom Exception for negative capacity (Step 3)
-        for (Bogie b : bogies) {
-            if (b.getCapacity() < 0) {
-                throw new InvalidCapacityException("Capacity cannot be negative: " + b.getCapacity());
+        // Assign cargo with safety validation
+        void assignCargo(String cargo) {
+            try {
+                // Rule: Rectangular bogie cannot carry Petroleum
+                if (shape.equalsIgnoreCase("Rectangular") &&
+                        cargo.equalsIgnoreCase("Petroleum")) {
+                    throw new CargoSafetyException("Error: Unsafe cargo assignment!");
+                }
+
+                this.cargo = cargo;
+                System.out.println("Cargo assigned successfully -> " + cargo);
+
+            } catch (CargoSafetyException e) {
+                System.out.println(e.getMessage());
+            } finally {
+                System.out.println("Cargo validation completed for " + shape + " bogie");
             }
         }
     }
 
+    // ----- MAIN METHOD -----
     public static void main(String[] args) {
-        System.out.println("================================================");
-        System.out.println(" UC14 - Exception Handling (Null & Custom) ");
-        System.out.println("================================================\n");
 
-        // Example Scenario: Valid list
-        List<Bogie> train = new ArrayList<>();
-        train.add(new Bogie("Sleeper", 72));
+        System.out.println("===== UC15 - Safe Cargo Assignment =====");
 
-        try {
-            validateBogies(train);
-            System.out.println("Validation Status: PASSED");
-        } catch (NullPointerException | InvalidCapacityException e) {
-            System.out.println("Validation Status: FAILED - " + e.getMessage());
-        }
+        // Safe case
+        GoodsBogie bogie1 = new GoodsBogie("Cylindrical");
+        bogie1.assignCargo("Petroleum");
 
-        System.out.println("\nUC14 validation completed...");
+        System.out.println();
 
-        // Run internal validation tests matching your test case snapshots
-        runInternalTests();
-    }
+        // Unsafe case
+        GoodsBogie bogie2 = new GoodsBogie("Rectangular");
+        bogie2.assignCargo("Petroleum");
 
-    public static void runInternalTests() {
-        System.out.println("\n--- Running Exception Validation Tests ---");
+        System.out.println();
 
-        // testException_NullBogieList
-        try {
-            validateBogies(null);
-            System.out.println("Test Null List: FAIL");
-        } catch (NullPointerException e) {
-            System.out.println("Test Null List: PASS (Caught NPE)");
-        } catch (Exception e) { System.out.println("Test Null List: FAIL"); }
-
-        // testException_InvalidCapacity
-        try {
-            List<Bogie> badTrain = List.of(new Bogie("Faulty", -10));
-            validateBogies(badTrain);
-            System.out.println("Test Negative Capacity: FAIL");
-        } catch (InvalidCapacityException e) {
-            System.out.println("Test Negative Capacity: PASS (Caught InvalidCapacityException)");
-        } catch (Exception e) { System.out.println("Test Negative Capacity: FAIL"); }
-
-        // testException_ValidBogieData
-        try {
-            validateBogies(List.of(new Bogie("Good", 50)));
-            System.out.println("Test Valid Data: PASS");
-        } catch (Exception e) {
-            System.out.println("Test Valid Data: FAIL");
-        }
+        System.out.println("UC15 runtime handling completed...");
     }
 }
