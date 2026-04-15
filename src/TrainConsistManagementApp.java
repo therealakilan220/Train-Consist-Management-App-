@@ -1,74 +1,57 @@
-import java.util.Arrays;
-
 /**
- * ##########################################################################
- * MAIN CLASS - UseCase19TrainConsistMgmt
- * ##########################################################################
- * * Use Case 19: Binary Search for Bogie ID
+ * ************************************************************
+ * MAIN CLASS - UseCase20TrainConsistMgmnt
+ * ************************************************************
+ * * Use Case 20: Exception Handling During Search Operations
  * * Description:
- * This class demonstrates searching for a specific bogie ID
- * using the Binary Search algorithm on sorted data.
+ * This class prevents searching when no bogies exist
+ * by applying fail-fast validation using exceptions.
  * * At this stage, the application:
- * - Creates sorted bogie ID array
- * - Defines search key
- * - Applies binary search logic
- * - Narrows search range each iteration
- * - Displays result
- * * This maps optimized searching logic using divide-and-conquer.
+ * - Creates bogie collection
+ * - Validates system state
+ * - Throws exception if empty
+ * - Stops invalid search operation
+ * - Displays meaningful message
+ * * This maps defensive programming using runtime exceptions.
  * * @author Developer
- * @version 19.0
+ * @version 20.0
  */
 public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
-        System.out.println("============================================");
-        System.out.println(" UC19 - Binary Search for Bogie ID ");
-        System.out.println("============================================\n");
+        System.out.println("******************************************");
+        System.out.println("UC20 - Exception Handling During Search");
+        System.out.println("******************************************\n");
 
-        // 1. Create array of bogie IDs
-        String[] bogieIds = {"BG309", "BG101", "BG550", "BG205", "BG412"};
+        // Create bogie array (empty train scenario)
+        String[] bogieIds = {};
 
-        // 2. Ensure data is sorted before binary search (Precondition)
-        Arrays.sort(bogieIds);
+        // Search key
+        String searchId = "BG101";
 
-        // 3. Search key
-        String key = "BG309";
-
-        // 4. Display available bogies (Sorted)
-        System.out.println("Sorted Bogie IDs:");
-        for (String id : bogieIds) {
-            System.out.println(id);
+        // ---- FAIL-FAST VALIDATION ----
+        // Check if train has bogies before performing search
+        if (bogieIds.length == 0) {
+            throw new IllegalStateException("No bogies available in train. Cannot perform search.");
         }
-        System.out.println();
 
-        // 5. BINARY SEARCH LOGIC
-        int low = 0;
-        int high = bogieIds.length - 1;
-        int resultIndex = -1;
+        // ---- SEARCH LOGIC (executes only if data exists) ----
+        boolean found = false;
 
-        while (low <= high) {
-            int mid = low + (high - low) / 2;
-
-            // Compare strings lexicographically
-            int comparison = key.compareTo(bogieIds[mid]);
-
-            if (comparison == 0) {
-                resultIndex = mid;
-                break; // Match found
-            } else if (comparison > 0) {
-                low = mid + 1; // Search in the right half
-            } else {
-                high = mid - 1; // Search in the left half
+        for (String id : bogieIds) {
+            if (id.equals(searchId)) {
+                found = true;
+                break;
             }
         }
 
-        // 6. Display result
-        if (resultIndex != -1) {
-            System.out.println("Bogie " + key + " found using Binary Search.");
+        // Display result
+        if (found) {
+            System.out.println("Bogie " + searchId + " found in the train.");
         } else {
-            System.out.println("Bogie " + key + " NOT found.");
+            System.out.println("Bogie " + searchId + " not found in the train.");
         }
 
-        System.out.println("\nUC19 search completed...");
+        System.out.println("\nUC20 execution completed...");
     }
 }
