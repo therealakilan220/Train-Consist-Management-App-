@@ -1,60 +1,74 @@
+import java.util.Arrays;
+
 /**
  * ##########################################################################
- * MAIN CLASS - UseCase18TrainConsistMgmt
+ * MAIN CLASS - UseCase19TrainConsistMgmt
  * ##########################################################################
- * * * Use Case 18: Linear Search for Bogie ID
- * * * Description:
+ * * Use Case 19: Binary Search for Bogie ID
+ * * Description:
  * This class demonstrates searching for a specific bogie ID
- * using a simple Linear Search algorithm.
- * * * At this stage, the application:
- * - Creates an array of bogie IDs
- * - Accepts a search key
- * - Traverses array sequentially
- * - Stops when match is found
- * - Displays search result
- * * * This maps basic searching logic using sequential traversal.
- * * * @author Developer
- * * @version 18.0
+ * using the Binary Search algorithm on sorted data.
+ * * At this stage, the application:
+ * - Creates sorted bogie ID array
+ * - Defines search key
+ * - Applies binary search logic
+ * - Narrows search range each iteration
+ * - Displays result
+ * * This maps optimized searching logic using divide-and-conquer.
+ * * @author Developer
+ * @version 19.0
  */
 public class TrainConsistManagementApp {
 
     public static void main(String[] args) {
         System.out.println("============================================");
-        System.out.println("UC18 - Linear Search For Bogie ID");
+        System.out.println(" UC19 - Binary Search for Bogie ID ");
         System.out.println("============================================\n");
 
         // 1. Create array of bogie IDs
-        String[] bogieIds = {"BG101", "BG205", "BG309", "BG412", "BG550"};
+        String[] bogieIds = {"BG309", "BG101", "BG550", "BG205", "BG412"};
 
-        // 2. Bogie ID to search (Search Key)
-        String searchId = "BG309";
+        // 2. Ensure data is sorted before binary search (Precondition)
+        Arrays.sort(bogieIds);
 
-        // 3. Display all bogies
-        System.out.println("Available Bogie IDs:");
+        // 3. Search key
+        String key = "BG309";
+
+        // 4. Display available bogies (Sorted)
+        System.out.println("Sorted Bogie IDs:");
         for (String id : bogieIds) {
             System.out.println(id);
         }
         System.out.println();
 
-        // 4. LINEAR SEARCH LOGIC
-        // Traverse each element sequentially
-        boolean found = false;
+        // 5. BINARY SEARCH LOGIC
+        int low = 0;
+        int high = bogieIds.length - 1;
+        int resultIndex = -1;
 
-        for (String id : bogieIds) {
-            // Use .equals() for string comparison in Java
-            if (id.equals(searchId)) {
-                found = true;
-                break; // Stop searching once match is found
+        while (low <= high) {
+            int mid = low + (high - low) / 2;
+
+            // Compare strings lexicographically
+            int comparison = key.compareTo(bogieIds[mid]);
+
+            if (comparison == 0) {
+                resultIndex = mid;
+                break; // Match found
+            } else if (comparison > 0) {
+                low = mid + 1; // Search in the right half
+            } else {
+                high = mid - 1; // Search in the left half
             }
         }
 
-        // 5. Display result
-        if (found) {
-            System.out.println("Bogie " + searchId + " found in train consist.");
+        // 6. Display result
+        if (resultIndex != -1) {
+            System.out.println("Bogie " + key + " found using Binary Search.");
         } else {
-            System.out.println("Bogie " + searchId + " NOT found in train consist.");
+            System.out.println("Bogie " + key + " NOT found.");
         }
 
-        System.out.println("\nUC18 search completed...");
+        System.out.println("\nUC19 search completed...");
     }
 }
